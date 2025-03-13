@@ -23,5 +23,5 @@ def save_chunks_with_vectors(file_path, output_json="chunks_with_vectors.json"):
 
     print(f"JSON файл сохранен: {output_json}")
 
-file_path = r"C:\Users\bm535\Downloads\ОРГ тех.pdf"  # Замените на путь к файлу
+file_path = r""  # Замените на путь к файлу
 save_chunks_with_vectors(file_path)
