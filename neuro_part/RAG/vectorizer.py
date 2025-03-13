@@ -4,7 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 
 def vectorize_chunks(chunks, n_components=10):
-    vectorizer = TfidfVectorizer(max_features=400)
+    vectorizer = TfidfVectorizer(max_features=40)
     vectors = vectorizer.fit_transform(chunks)
 
     svd = TruncatedSVD(n_components=n_components)
