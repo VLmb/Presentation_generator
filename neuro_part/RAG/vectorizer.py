@@ -1,27 +1,68 @@
-from chunk_creater import split_text_by_sentences
 import json
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.decomposition import TruncatedSVD
+from chunk_creater import split_text_by_sentences
+import torch
+import torch.nn.functional as F
+from torch.utils.data import DataLoader
+from transformers import AutoTokenizer, AutoModel
+import chromadb
 
-def vectorize_chunks(chunks, n_components=10):
-    vectorizer = TfidfVectorizer(max_features=40)
-    vectors = vectorizer.fit_transform(chunks)
+tokenizer = AutoTokenizer.from_pretrained("ai-forever/ru-en-RoSBERTa")
+model = AutoModel.from_pretrained("ai-forever/ru-en-RoSBERTa")
 
-    svd = TruncatedSVD(n_components=n_components)
-    reduced_vectors = svd.fit_transform(vectors)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = model.to(device)
+torch.cuda.empty_cache()
 
-    return reduced_vectors.tolist()
+DB_PATH = "./chroma_db"
 
+def vectorize_chunks(chunks: list, pooling_method="mean", batch_size=16) -> list:
+    """
+    Преобразует текстовые чанки в векторы, используя трансформер.
+    """
+    all_vectors = []
+    dataloader = DataLoader(chunks, batch_size=batch_size, shuffle=False)
 
-def save_chunks_with_vectors(file_path, output_json="chunks_with_vectors.json"):
+    for batch in dataloader:
+        tokenized_inputs = tokenizer(batch, max_length=32, padding=True, truncation=True, return_tensors="pt").to(device)
+
+        with torch.no_grad():
+            outputs = model(**tokenized_inputs)
+
+        if pooling_method == "mean":
+            mask = tokenized_inputs["attention_mask"]
+            embeddings = (outputs.last_hidden_state * mask.unsqueeze(-1)).sum(dim=1) / mask.sum(dim=1, keepdim=True)
+        else:
+            embeddings = outputs.last_hidden_state[:, 0]
+
+        embeddings = F.normalize(embeddings, p=2, dim=1)
+        all_vectors.extend(embeddings.cpu().tolist())
+
+    return all_vectors
+
+def save_chunks_with_vectors(file_path, db_path=DB_PATH) -> None:
+    """
+    Разбивает текст на чанки, векторизует их и сохраняет в ChromaDB.
+    """
+    chroma_client = chromadb.PersistentClient(path=db_path)
+    collection = chroma_client.get_or_create_collection(name="documents")
+
     chunks = split_text_by_sentences(file_path)
+
     vectors = vectorize_chunks(chunks)
-    data = [{"chunk": chunk, "vector": vector} for chunk, vector in zip(chunks, vectors)]
+    chunk_ids = [f"chunk_{i}" for i in range(len(chunks))]
 
-    with open(output_json, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+    collection.add(
+        ids=chunk_ids,
+        embeddings=vectors,
+        metadatas=[{"text": chunk} for chunk in chunks]
+    )
 
-    print(f"JSON файл сохранен: {output_json}")
+
+    config = {"db_path": db_path}
+    with open("config.json", "w", encoding="utf-8") as f:
+        json.dump(config, f)
+
+
 
 file_path = r""  # Замените на путь к файлу
 save_chunks_with_vectors(file_path)

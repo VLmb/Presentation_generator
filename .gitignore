@@ -1,3 +1,5 @@
 /neuro_part/RAG/chunks_with_vectors.json
 /neuro_part/RAG/test.py
 /neuro_part/RAG/test2.py
+/neuro_part/RAG/config.json
+/neuro_part/RAG/chroma_db
