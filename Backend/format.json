@@ -1,0 +1,27 @@
+{
+  "Name of presentation": "название презентации",
+  "Name of creator": "имя автора",
+  "ID": "какой-то номер для упорядочивания",
+  "created_at": "дата создания",
+  "update_at": "дата редактирования",
+  "slides": [
+    {
+      "title": "текст заголовка",
+      "title_font": "шрифт заголовка",
+      "title_font_size": "размер шрифта заголовка",
+      "content": "текст основной части",
+      "content_font": "шрифт основного текста",
+      "content_font_size": "размер шрифта заголовка",
+      "images_url": ["https://example_slide1.com/image1.png", "https://example_slide1.com/image2.png"]
+    },
+    {
+      "title": "текст заголовка",
+      "title_font": "шрифт заголовка",
+      "title_font_size": "размер шрифта заголовка",
+      "content": "текст основной части",
+      "content_font": "шрифт основного текста",
+      "content_font_size": "размер шрифта заголовка",
+      "images_url": ["https://example_slide2.com/image1.png", "https://example_slide2.com/image2.png"]
+    }
+  ]
+}
