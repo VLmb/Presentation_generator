@@ -62,7 +62,7 @@ def save_chunks_with_vectors(file_path, db_path=DB_PATH) -> None:
     with open("config.json", "w", encoding="utf-8") as f:
         json.dump(config, f)
 
-
-
-file_path = r""  # Замените на путь к файлу
-save_chunks_with_vectors(file_path)
+# При запуске именно этого файла будет запускаться сохранение векторов 
+if __name__ == '__main__':
+    file_path = r""  # Замените на путь к файлу
+    save_chunks_with_vectors(file_path)
