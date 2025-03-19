@@ -39,6 +39,7 @@ def create_presentation(topic, slides_data, background_image):
 # конвертация PPTX в PDF
 def convert_pptx_to_pdf(pptx_path):
     pdf_path = pptx_path.replace(".pptx", ".pdf")
+    # TODO - конвертация на любой ОС
     os.system(f"libreoffice --headless --convert-to pdf {pptx_path} --outdir {os.path.dirname(pptx_path)}")
     return pdf_path
 

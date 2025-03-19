@@ -21,6 +21,7 @@ background_options = {
 selected_background = st.selectbox("Выберите фон", list(background_options.keys()))
 background_image = background_options[selected_background]
 
+# TODO - request (import requests)
 slides_data = []
 
 # Ввод данных
