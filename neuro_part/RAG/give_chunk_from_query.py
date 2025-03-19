@@ -40,6 +40,7 @@ def find_similar_chunks(query_text, top_k=7):
     for i, (chunk_text, distance) in enumerate(zip(results["metadatas"][0], results["distances"][0])):
         print(f"{i+1}. {chunk_text['text']} ")
 
-
-query = '' #запрос от пользователя
-find_similar_chunks(query)
+# Код будет запускаться при запуске именно этого файла, удобнее для тестирования
+if __name__ == '__main__':
+    query = '' #запрос от пользователя
+    find_similar_chunks(query)
