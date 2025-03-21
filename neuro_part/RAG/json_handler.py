@@ -1,3 +1,3 @@
 
-def parse_json():
+def parse_json(json_file):
     pass
