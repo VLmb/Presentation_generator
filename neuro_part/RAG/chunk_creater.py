@@ -3,6 +3,7 @@ import fitz
 import docx
 import re
 
+
 def split_into_sentences(text):
     sentences = re.split(r'(?<=[.!?])\s+', text)  # Разбиваем текст на предложения
     return [s.strip() for s in sentences if s.strip()]

@@ -15,6 +15,7 @@ torch.cuda.empty_cache()
 
 DB_PATH = "./chroma_db"
 
+
 def vectorize_chunks(chunks: list, pooling_method="mean", batch_size=16) -> list:
     """
     Преобразует текстовые чанки в векторы, используя трансформер.
@@ -23,7 +24,8 @@ def vectorize_chunks(chunks: list, pooling_method="mean", batch_size=16) -> list
     dataloader = DataLoader(chunks, batch_size=batch_size, shuffle=False)
 
     for batch in dataloader:
-        tokenized_inputs = tokenizer(batch, max_length=32, padding=True, truncation=True, return_tensors="pt").to(device)
+        tokenized_inputs = tokenizer(batch, max_length=32, padding=True,
+                                     truncation=True, return_tensors="pt").to(device)
 
         with torch.no_grad():
             outputs = model(**tokenized_inputs)
@@ -38,6 +40,7 @@ def vectorize_chunks(chunks: list, pooling_method="mean", batch_size=16) -> list
         all_vectors.extend(embeddings.cpu().tolist())
 
     return all_vectors
+
 
 def save_chunks_with_vectors(file_path, db_path=DB_PATH) -> None:
     """
@@ -57,10 +60,10 @@ def save_chunks_with_vectors(file_path, db_path=DB_PATH) -> None:
         metadatas=[{"text": chunk} for chunk in chunks]
     )
 
-
     config = {"db_path": db_path}
     with open("config.json", "w", encoding="utf-8") as f:
         json.dump(config, f)
+
 
 # При запуске именно этого файла будет запускаться сохранение векторов 
 if __name__ == '__main__':

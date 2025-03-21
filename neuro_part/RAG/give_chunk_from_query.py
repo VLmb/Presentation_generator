@@ -16,11 +16,12 @@ model = AutoModel.from_pretrained("ai-forever/ru-en-RoSBERTa").to("cuda" if torc
 model.eval()
 
 
-def vectorize_query(query_text):
+def vectorize_query(query_text) -> list:
     """
     Векторизует один текстовый запрос (без сохранения в БД).
     """
-    tokenized_inputs = tokenizer(query_text, max_length=32, padding=True, truncation=True, return_tensors="pt").to(model.device)
+    tokenized_inputs = tokenizer(query_text, max_length=32, padding=True,
+                                 truncation=True, return_tensors="pt").to(model.device)
 
     with torch.no_grad():
         outputs = model(**tokenized_inputs)
@@ -29,6 +30,8 @@ def vectorize_query(query_text):
     embeddings = F.normalize(embeddings, p=2, dim=1)
     return embeddings.cpu().tolist()[0]
 
+
+# Нужно сделать так, чтобы функция возвращала чанки, а не выводила их на экран
 def find_similar_chunks(query_text, top_k=7):
     """
     Находит похожие чанки в ChromaDB по заданному тексту.
@@ -40,7 +43,8 @@ def find_similar_chunks(query_text, top_k=7):
     for i, (chunk_text, distance) in enumerate(zip(results["metadatas"][0], results["distances"][0])):
         print(f"{i+1}. {chunk_text['text']} ")
 
+
 # Код будет запускаться при запуске именно этого файла, удобнее для тестирования
 if __name__ == '__main__':
-    query = '' #запрос от пользователя
+    query = ''  # запрос от пользователя
     find_similar_chunks(query)
