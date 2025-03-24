@@ -4,7 +4,7 @@ from database import Presentation, Slide, db
 from datetime import datetime
 
 api_bp = Blueprint('api.backend', __name__)
-api_neuro_part = "api.neuro_part"
+api_neuro_part = "api_neuro_part"
 params = "\gen_by_def_params"
 text = "\gen_by_text"
 

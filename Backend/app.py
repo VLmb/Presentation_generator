@@ -9,7 +9,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 init_db(app)
 
-app.register_blueprint(api_bp, url_prefix='/api.backend')
+app.register_blueprint(api_bp, url_prefix='/api_backend')
 
 if __name__ == '__main__':
     app.run(debug=True)

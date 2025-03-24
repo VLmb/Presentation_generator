@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from json_handler import parse_json_with_def_params, parse_json_with_text
 
-api_bp = Blueprint('api.neuro_part', __name__)
+api_bp = Blueprint('api_neuro_part', __name__)
 
 @api_bp.route('/gen_by_def_params', methods = ['POST'])
 def gen_by_def_params():
