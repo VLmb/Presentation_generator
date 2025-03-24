@@ -11,7 +11,7 @@
       "title_font": "шрифт заголовка",
       "title_font_size": "размер шрифта заголовка",
       "content": "текст основной части",
-      "content_font": "шрифт основного текста",
+      "content_font": "шрифт сновного текста",
       "content_font_size": "размер шрифта заголовка",
       "images_url": ["https://example_slide1.com/image1.png", "https://example_slide1.com/image2.png"]
     },

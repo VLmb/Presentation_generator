@@ -1,9 +1,29 @@
+import requests
 from flask import Blueprint, request, jsonify
 from database import Presentation, Slide, db
 from datetime import datetime
-import requests
 
-api_bp = Blueprint('api', __name__)
+api_bp = Blueprint('api.backend', __name__)
+api_neuro_part = "api.neuro_part"
+params = "\gen_by_def_params"
+text = "\gen_by_text"
+
+# @api_bp.route('/create_presentation_by_text', methods=['POST'])
+# def create_presentation_by_text
+
+@api_bp.route('/gen_presentation_by_params', methods=['POST'])
+def gen_presentation_by_params():
+    data = request.get_json()
+    headers = {"Content-Type": "application/json", "User-Agent": "MyApp"}
+    response = requests.post(api_neuro_part+params, json=data, headers=headers)
+    return response.status_code
+
+@api_bp.route('/gen_presentation_by_text', methods=['POST'])
+def gen_presentation_by_text():
+    data = request.get_json()
+    headers = {"Content-Type": "application/json", "User-Agent": "MyApp"}
+    response = requests.post(api_neuro_part+text, json=data, headers=headers)
+    return response.status_code
 
 @api_bp.route('/create_presentation', methods=['POST'])
 def create_presentation():
@@ -11,11 +31,9 @@ def create_presentation():
 
     name_of_presentation = data.get('Name of presentation')
     user_name = data.get('Name of creator')
-    created_at = data.get('created_at')
-    updated_at = data.get('updated_at')
 
-    created_at = datetime.fromisoformat(created_at.replace("Z", "+00:00")) if created_at else None
-    updated_at = datetime.fromisoformat(updated_at.replace("Z", "+00:00")) if updated_at else None
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+    updated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     presentation = Presentation(
         user_name=user_name,
@@ -51,6 +69,7 @@ def create_presentation():
         'slides_count': len(slides_data)
     })
 
+# Получение презентации по ID
 @api_bp.route('/get_presentation/<int:id>', methods=['GET'])
 def get_presentation(id):
     presentation = Presentation.query.get_or_404(id)
@@ -78,6 +97,7 @@ def get_presentation(id):
         ]
     })
 
+#Получение всех презентаций конкретного пользователя
 @api_bp.route('/get_presentations_all/<string:user_name>', methods = ['GET'])
 def get_presentations_all(user_name):
     presentations = Presentation.query.filter_by(user_name = user_name).all()
