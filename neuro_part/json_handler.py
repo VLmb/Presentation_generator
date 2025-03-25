@@ -1,8 +1,8 @@
 #название, количество слайдов
-def gen_by_params(json_file):
+def neuro_gen_by_def_params(json_file):
     return json_file
 #название, текст
-def gen_by_text(json_file):
+def neuro_gen_by_text(json_file):
     return json_file
 '''
 Сгенерированный json можешь отправить в бэк можешь передать с помощью след кода:
