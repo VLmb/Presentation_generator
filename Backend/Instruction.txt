@@ -1,0 +1,7 @@
+Как запустить работу АПИ?
+Нужно создать два терминала, в одном перейти в папку Backend, а в другом перейти в папку
+neuro_part, и там, и там запустить приложение app.py (python app.py/pu app.py).
+Через Postman обращаться к API по порту 5000, или с фронтенда отправлять запрос с помощью
+headers = {"Content-Type": "application/json", "User-Agent": "MyApp"}
+response = requests.post("http://127.0.0.1:5000/api_backend/(нужный метод)", json=data(при пост запросе), headers=headers(при пост запросе))
+response.json() - json с презентацией/презентациями
