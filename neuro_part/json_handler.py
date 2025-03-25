@@ -1,10 +1,9 @@
 #название, количество слайдов
-def parse_json_with_def_params(json_file):
-    pass
+def gen_by_params(json_file):
+    return json_file
 #название, текст
-def parse_json_with_text(json_file):
-    pass
-
+def gen_by_text(json_file):
+    return json_file
 '''
 Сгенерированный json можешь отправить в бэк можешь передать с помощью след кода:
 headers = {"Content-Type": "application/json", "User-Agent": "MyApp"}

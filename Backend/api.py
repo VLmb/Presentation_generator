@@ -3,10 +3,10 @@ from flask import Blueprint, request, jsonify
 from database import Presentation, Slide, db
 from datetime import datetime
 
-api_bp = Blueprint('api.backend', __name__)
+api_bp = Blueprint('api_backend', __name__)
 api_neuro_part = "api_neuro_part"
-params = "\gen_by_def_params"
-text = "\gen_by_text"
+params = "/gen_by_def_params"
+text = "/gen_by_text"
 
 # @api_bp.route('/create_presentation_by_text', methods=['POST'])
 # def create_presentation_by_text
@@ -14,16 +14,101 @@ text = "\gen_by_text"
 @api_bp.route('/gen_presentation_by_params', methods=['POST'])
 def gen_presentation_by_params():
     data = request.get_json()
+
+    name_of_presentation = data.get('Name of presentation')
+    name_of_creator = data.get('Name of creator')
+
     headers = {"Content-Type": "application/json", "User-Agent": "MyApp"}
-    response = requests.post(api_neuro_part+params, json=data, headers=headers)
-    return response.status_code
+    response = requests.post("http://127.0.0.1:5001/api_neuro_part/gen_by_def_params", json=data, headers=headers)
+
+    print("Статус код:", response.status_code)
+    print("Ответ сервера:", response.text)
+
+    answer = response.json()
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+    updated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    presentation = Presentation(
+        user_name=name_of_creator,
+        name_of_presentation=name_of_presentation,
+        created_at=created_at,
+        updated_at=updated_at
+    )
+    db.session.add(presentation)
+    db.session.flush()
+
+    slides_data = answer.get('slides', [])
+    for index, slide_data in enumerate(slides_data, start=1):
+        slide = Slide(
+            presentation_id=presentation.id,
+            theme=slide_data.get('theme'),
+            title=slide_data.get('title'),
+            title_font=slide_data.get('title_font'),
+            title_font_size=slide_data.get('title_font_size'),
+            content=slide_data.get('content'),
+            content_font=slide_data.get('content_font'),
+            content_font_size=slide_data.get('content_font_size'),
+            images=slide_data.get('images_url', [])
+        )
+        db.session.add(slide)
+
+    db.session.commit()
+
+    return jsonify({
+        '!!!': "Эшкере",
+        'id': presentation.id,
+        'name_of_presentation': presentation.name_of_presentation,
+        'user_name': presentation.user_name,
+        'slides_count': len(slides_data)
+    })
 
 @api_bp.route('/gen_presentation_by_text', methods=['POST'])
 def gen_presentation_by_text():
     data = request.get_json()
+
+    name_of_presentation = data.get('Name of presentation')
+    name_of_creator = data.get('Name of creator')
+
     headers = {"Content-Type": "application/json", "User-Agent": "MyApp"}
-    response = requests.post(api_neuro_part+text, json=data, headers=headers)
-    return response.status_code
+    response = requests.post("http://127.0.0.1:5001/api_neuro_part/gen_by_text", json=data, headers=headers)
+
+    answer = response.json()
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+    updated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    presentation = Presentation(
+        user_name=name_of_creator,
+        name_of_presentation=name_of_presentation,
+        created_at=created_at,
+        updated_at=updated_at
+    )
+    db.session.add(presentation)
+    db.session.flush()
+
+    slides_data = answer.get('slides', [])
+    for index, slide_data in enumerate(slides_data, start=1):
+        slide = Slide(
+            presentation_id=presentation.id,
+            theme=slide_data.get('theme'),
+            title=slide_data.get('title'),
+            title_font=slide_data.get('title_font'),
+            title_font_size=slide_data.get('title_font_size'),
+            content=slide_data.get('content'),
+            content_font=slide_data.get('content_font'),
+            content_font_size=slide_data.get('content_font_size'),
+            images=slide_data.get('images_url', [])
+        )
+        db.session.add(slide)
+
+    db.session.commit()
+
+    return jsonify({
+        '!!!': "Эшкере",
+        'id': presentation.id,
+        'name_of_presentation': presentation.name_of_presentation,
+        'user_name': presentation.user_name,
+        'slides_count': len(slides_data)
+    })
 
 @api_bp.route('/create_presentation', methods=['POST'])
 def create_presentation():
