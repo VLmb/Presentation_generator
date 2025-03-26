@@ -2,7 +2,9 @@ import os
 import fitz
 import docx
 import re
-
+'''
+ЭТИ ФУНКЦИИИ РЕАЛИЗОВАНЫ ДОЛЖНЫ БЫТЬ НА ФРОНТЕ, МНЕ(БОГДАНУ) ПЕРЕДАЕМ ЛИШЬ ТЕКСТ
+'''
 
 def split_into_sentences(text):
     sentences = re.split(r'(?<=[.!?])\s+', text)  # Разбиваем текст на предложения
