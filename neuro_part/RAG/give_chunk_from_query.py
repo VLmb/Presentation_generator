@@ -31,8 +31,7 @@ def vectorize_query(query_text) -> list:
     return embeddings.cpu().tolist()[0]
 
 
-# Нужно сделать так, чтобы функция возвращала чанки, а не выводила их на экран
-def find_similar_chunks(query_text, top_k=7):
+def find_similar_chunks(query_text, top_k=7) -> list:
     """
     Находит похожие чанки в ChromaDB по заданному тексту.
     """
@@ -40,8 +39,16 @@ def find_similar_chunks(query_text, top_k=7):
 
     results = collection.query(query_embeddings=[query_vector], n_results=top_k)
 
+    chunks = []
+
     for i, (chunk_text, distance) in enumerate(zip(results["metadatas"][0], results["distances"][0])):
-        print(f"{i+1}. {chunk_text['text']} ")
+        chunks.append(chunk_text['text'])
+
+    return chunks
+
+'''
+после отработки скрипта, нужно очищать БД
+'''
 
 
 # Код будет запускаться при запуске именно этого файла, удобнее для тестирования

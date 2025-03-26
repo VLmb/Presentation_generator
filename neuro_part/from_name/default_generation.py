@@ -51,3 +51,6 @@ def parse_text(text_answer):
     except Exception:
         return [{"title":"ошибка","text":text_answer}]
 
+'''
+Надо от сюда подать json файл в соответствующую функцию в json_handler
+'''
