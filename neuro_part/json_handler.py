@@ -3,6 +3,11 @@ from RAG import give_chunk_from_query as g
 
 #название, количество слайдов
 def neuro_gen_by_def_params(json_file): #сделает Богдан с мишей
+
+    presentation_name = json_file.get('name')
+    number_of_slides = json_file.get('slides') #
+
+
     return json_file
 #название, текст
 def neuro_gen_by_text(json_file):
