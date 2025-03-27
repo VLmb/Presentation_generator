@@ -1,14 +1,26 @@
+from RAG import vectorizer as v
+from RAG import give_chunk_from_query as g
+
 #название, количество слайдов
 def neuro_gen_by_def_params(json_file): #сделает Богдан с мишей
     return json_file
 #название, текст
 def neuro_gen_by_text(json_file):
-    presentation_name = json_file.get("name")
+    presentation_name = json_file.get("name") # название презентации
+    file_text = json_file.get("text")  # текст файла, на основе которого делать презентацию
+    number_of_slides = json_file.get("slides") # количество слайдов
+
+    v.save_chunks_with_vectors(text=file_text)
+    g.find_similar_chunks(presentation_name) # получаем чанки, соответствующие запросу названия презентации
+
     '''
-    надо сделать, чтобы в функцию еще передавался файл(txt, docx, pdf)(функция генерирует по инфе с файла)
-    по нему мы будем делать поиск
+    нам нужно обратиться к нейронке, вставляя в промпт наши чанки
+    '''
+
+    '''
     возвращаем json ответ нейронки
     '''
+
     return json_file
 
 

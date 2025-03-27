@@ -1,5 +1,5 @@
 import json
-from chunk_creater import split_text_by_sentences
+from chunk_creater import text_to_chunks
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
@@ -42,14 +42,14 @@ def vectorize_chunks(chunks: list, pooling_method="mean", batch_size=16) -> list
     return all_vectors
 
 
-def save_chunks_with_vectors(file_path, db_path=DB_PATH) -> None:
+def save_chunks_with_vectors(text, db_path=DB_PATH) -> None:
     """
     Разбивает текст на чанки, векторизует их и сохраняет в ChromaDB.
     """
     chroma_client = chromadb.PersistentClient(path=db_path)
     collection = chroma_client.get_or_create_collection(name="documents")
 
-    chunks = split_text_by_sentences(file_path)
+    chunks = text_to_chunks(text)
 
     vectors = vectorize_chunks(chunks)
     chunk_ids = [f"chunk_{i}" for i in range(len(chunks))]
