@@ -1,11 +1,18 @@
 from gradio_client import Client
+import json
 
 client = Client("Qwen/Qwen2.5") # Нужен URL
 
-SYSTEM_PROMPT = f'''Вы — эксперт по созданию текста для презентаций. 
+SYSTEM_PROMPT = '''Вы — эксперт по созданию текста для презентаций. 
 Ваша задача — генерировать контент для презентации на основе запроса пользователя.
 Для каждого слайда предоставьте заголовок и описание в следующем формате:
-"Слайд [номер слайда][заголовок][описание]".
+"slide [number of slide]": [header:], [description:]".
+вот тебе пример json-ответа
+  "slide N": {
+    "header": "",
+    "description": ""
+  }
+
 Верните только указанное количество слайдов, каждый с уникальным заголовком и текстом, соответствующим теме.
 ответ возвращай в json формате. Если после "Предложения, на основе которых создавать слайды" есть текст, то генерируешь
 презентацию ТОЛЬКО и только, ничем более не руководствуясь, на основе этого текста, если текст отсутствует, то генерируешь, ориентируясь лишь на название
@@ -28,7 +35,7 @@ def query_to_qwen(slides_num, pres_name, text=''):
     текстовый ответ от нейросети
     '''
 
-    user_prompt = create_user_prompt(slides_num, pres_name, text='')
+    user_prompt = create_user_prompt(slides_num, pres_name, text)
     try:
         result = client.predict(
             query=user_prompt,
@@ -40,9 +47,14 @@ def query_to_qwen(slides_num, pres_name, text=''):
             text_answer = result[1][0][-1]['text']
         else:
             text_answer = result
-        # print("презентация",text_answer)
-        # return parse_text(text_answer) - миши вариация
+
+        # удаление "мусора"
+        text_answer = text_answer.replace("`", "")
+        text_answer = text_answer.replace("json\n", "")
+
+        text_answer = json.loads(text_answer) # представляем ответ в виде словаря
         return text_answer
+
     except Exception as e:
         print("ошибка",e)
         return None

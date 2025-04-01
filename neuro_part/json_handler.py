@@ -8,11 +8,10 @@ def neuro_gen_by_def_params(json_file):
     number_of_slides = json_file.get('slides')
 
     qwen_answer = sg.query_to_qwen(number_of_slides, presentation_name)
+    json_file = qwen_answer
 
-    '''
-    преобразовать ответ в json
-    '''
     return json_file
+
 
 
 #название, текст
@@ -26,10 +25,7 @@ def neuro_gen_by_text(json_file):
     chunks = ''.join(chunks)
 
     qwen_answer = sg.query_to_qwen(number_of_slides, presentation_name, chunks)
-
-    '''
-    возвращаем json ответ нейронки
-    '''
+    json_file = qwen_answer
 
     return json_file
 
