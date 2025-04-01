@@ -46,6 +46,7 @@ def save_chunks_with_vectors(text, db_path=DB_PATH) -> None:
     """
     Разбивает текст на чанки, векторизует их и сохраняет в ChromaDB.
     """
+
     chroma_client = chromadb.PersistentClient(path=db_path)
     collection = chroma_client.get_or_create_collection(name="documents")
 

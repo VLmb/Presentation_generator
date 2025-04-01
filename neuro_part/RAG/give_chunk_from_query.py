@@ -20,6 +20,7 @@ def vectorize_query(query_text) -> list:
     """
     Векторизует один текстовый запрос (без сохранения в БД).
     """
+
     tokenized_inputs = tokenizer(query_text, max_length=32, padding=True,
                                  truncation=True, return_tensors="pt").to(model.device)
 
