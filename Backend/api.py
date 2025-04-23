@@ -41,14 +41,14 @@ def gen_presentation_by_params():
     for index, slide_data in enumerate(slides_data, start=1):
         slide = Slide(
             presentation_id=presentation.id,
-            theme=slide_data.get('theme'),
-            title=slide_data.get('title'),
-            title_font=slide_data.get('title_font'),
-            title_font_size=slide_data.get('title_font_size'),
-            content=slide_data.get('content'),
-            content_font=slide_data.get('content_font'),
-            content_font_size=slide_data.get('content_font_size'),
-            images=slide_data.get('images_url', [])
+            theme="theme",     #slide_data.get('theme'),
+            title=slide_data.get('header'),
+            title_font="Normal",  #slide_data.get('title_font')
+            title_font_size=16,  #slide_data.get('title_font_size'),
+            content=slide_data.get('description'),
+            content_font="Normal",  #slide_data.get('content_font'),
+            content_font_size=14,  #slide_data.get('content_font_size'),
+            images="null" #slide_data.get('images_url', [])
         )
         db.session.add(slide)
 
@@ -58,6 +58,7 @@ def gen_presentation_by_params():
         '!!!': "Эшкере",
         'id': presentation.id,
         'name_of_presentation': presentation.name_of_presentation,
+        'content': presentation.content,
         'user_name': presentation.user_name,
         'slides_count': len(slides_data)
     })
