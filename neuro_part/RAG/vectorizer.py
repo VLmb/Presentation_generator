@@ -65,6 +65,14 @@ def save_chunks_with_vectors(text, db_path=DB_PATH) -> None:
     with open("config.json", "w", encoding="utf-8") as f:
         json.dump(config, f)
 
+def clear_db(db_path=DB_PATH) -> None:
+    """
+    Очищает коллекцию документов в базе данных ChromaDB.
+    """
+    chroma_client = chromadb.PersistentClient(path=db_path)
+    collection = chroma_client.get_or_create_collection(name="documents")
+    collection.delete(where={})  # Удаляет все документы без условий
+
 
 # При запуске именно этого файла будет запускаться сохранение векторов 
 if __name__ == '__main__':

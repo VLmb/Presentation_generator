@@ -10,6 +10,8 @@ def neuro_gen_by_def_params(json_file):
     qwen_answer = sg.query_to_qwen(number_of_slides, presentation_name)
     json_file = qwen_answer
 
+    v.clear_db()
+
     return json_file
 
 
@@ -26,6 +28,8 @@ def neuro_gen_by_text(json_file):
 
     qwen_answer = sg.query_to_qwen(number_of_slides, presentation_name, chunks)
     json_file = qwen_answer
+
+    v.clear_db()
 
     return json_file
 
