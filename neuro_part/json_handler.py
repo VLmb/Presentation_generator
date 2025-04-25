@@ -1,4 +1,4 @@
-from RAG import vectorizer as v
+import vectorizer as v
 from RAG import give_chunk_from_query as g
 import slide_generator as sg
 

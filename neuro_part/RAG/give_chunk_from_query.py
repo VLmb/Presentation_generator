@@ -4,9 +4,7 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
 
-with open("config.json", "r", encoding="utf-8") as f:
-    config = json.load(f)
-DB_PATH = config["db_path"]
+DB_PATH = "./chroma_db"
 
 chroma_client = chromadb.PersistentClient(path=DB_PATH)
 collection = chroma_client.get_collection(name="documents")

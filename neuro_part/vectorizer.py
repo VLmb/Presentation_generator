@@ -1,5 +1,5 @@
 import json
-from chunk_creater import text_to_chunks
+from RAG.chunk_creater import  text_to_chunks
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
@@ -13,7 +13,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 torch.cuda.empty_cache()
 
-DB_PATH = "./chroma_db"
+DB_PATH = "RAG/chroma_db"
 
 
 def vectorize_chunks(chunks: list, pooling_method="mean", batch_size=16) -> list:
@@ -62,7 +62,7 @@ def save_chunks_with_vectors(text, db_path=DB_PATH) -> None:
     )
 
     config = {"db_path": db_path}
-    with open("config.json", "w", encoding="utf-8") as f:
+    with open("RAG/config.json", "w", encoding="utf-8") as f:
         json.dump(config, f)
 
 def clear_db(db_path=DB_PATH) -> None:
