@@ -37,6 +37,12 @@ def create_presentation(topic, slides_data, background_path):
     prs.save(pptx_path)
     return pptx_path
 
+def generate_slides_json(topic, slides_data):
+    presentation_data = {
+        "Presentation_title": topic,
+        "Slide_count": slides_count
+    }
+    return json.dumps(presentation_data, ensure_ascii=False, indent=4)
 
 def convert_to_pdf(pptx_path):
     pdf_path = pptx_path.replace(".pptx", ".pdf")
