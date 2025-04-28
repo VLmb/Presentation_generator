@@ -4,8 +4,10 @@ import slide_generator as sg
 
 def neuro_gen_by_def_params(json_file):
 
-    presentation_name = json_file.get('name')
-    number_of_slides = json_file.get('slides')
+    presentation_name = json_file.get('Presentation_title')
+    number_of_slides = json_file.get('Slide_count')
+    #slides = json_file.get('Slides')
+    #после итерируемся по массиву и создаем список тайтлов
 
     qwen_answer = sg.query_to_qwen(number_of_slides, presentation_name)
     json_file = qwen_answer
@@ -14,13 +16,15 @@ def neuro_gen_by_def_params(json_file):
 
     return json_file
 
-
+'''
+надо еще парсить slides и для каждого слайда slide title
+'''
 
 #название, текст
 def neuro_gen_by_text(json_file):
-    presentation_name = json_file.get("name")  # название презентации
-    file_text = json_file.get("text")  # текст файла, на основе которого делать презентацию
-    number_of_slides = json_file.get("slides")  # количество слайдов
+    presentation_name = json_file.get("Presentation_title")  # название презентации
+    file_text = json_file.get("Description")  # текст файла, на основе которого делать презентацию
+    number_of_slides = json_file.get("Slide_count")  # количество слайдов
 
     v.save_chunks_with_vectors(text=file_text)
     chunks = g.find_similar_chunks(presentation_name)  # получаем чанки, соответствующие запросу названия презентации

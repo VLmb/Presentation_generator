@@ -71,7 +71,7 @@ def clear_db(db_path=DB_PATH) -> None:
     """
     chroma_client = chromadb.PersistentClient(path=db_path)
     collection = chroma_client.get_or_create_collection(name="documents")
-    collection.delete(where={})  # Удаляет все документы без условий
+    collection.delete(where={"id": {"$ne": ""}})  # Удаляет все документы без условий
 
 
 # При запуске именно этого файла будет запускаться сохранение векторов 
