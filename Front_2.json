@@ -1,0 +1,5 @@
+{
+  "Presentation_title": "string",
+  "Slide_count": int,
+  "Description": "string"
+}

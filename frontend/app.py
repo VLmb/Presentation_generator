@@ -6,6 +6,7 @@ import os
 import comtypes.client
 import pythoncom
 from PIL import Image
+import requests
 
 BACKGROUNDS = {
     "Синий градиент": "backgrounds/blue_gradient.jpg",
@@ -37,12 +38,19 @@ def create_presentation(topic, slides_data, background_path):
     prs.save(pptx_path)
     return pptx_path
 
-def generate_slides_json(topic, slides_data):
+def generate_slides_json(topic, slides_count):
     presentation_data = {
         "Presentation_title": topic,
         "Slide_count": slides_count
     }
-    return json.dumps(presentation_data, ensure_ascii=False, indent=4)
+
+    data = json.dumps(presentation_data, ensure_ascii=False, indent=4)
+
+    headers = {"Content-Type": "application/json", "User-Agent": "MyApp"}
+    response = requests.post("http://127.0.0.1:5000/api_backend/gen_presentation_by_params", json=data(), headers = headers())
+    response.json()
+
+    return
 
 def convert_to_pdf(pptx_path):
     pdf_path = pptx_path.replace(".pptx", ".pdf")

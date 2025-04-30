@@ -1,0 +1,10 @@
+{
+  "Presentation_title": "string",
+  "Slide_count": int,
+  "Slides": [
+    {
+      "Slide_title": "string",
+      "Slide_content": "string"
+    }
+  ]
+}
