@@ -50,5 +50,5 @@ def find_similar_chunks(query_text, top_k=7) -> list:
 
 # Код будет запускаться при запуске именно этого файла, удобнее для тестирования
 if __name__ == '__main__':
-    query = ''  # запрос от пользователя
+    query = 'кочевники'  # запрос от пользователя
     find_similar_chunks(query)
