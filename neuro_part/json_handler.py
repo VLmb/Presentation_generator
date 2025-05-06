@@ -9,8 +9,8 @@ def neuro_gen_by_def_params(json_file):
     #slides = json_file.get('Slides')
     #после итерируемся по массиву и создаем список тайтлов
 
-    qwen_answer = sg.query_to_qwen(number_of_slides, presentation_name)
-    json_file = qwen_answer
+    #qwen_answer = sg.query_to_qwen(number_of_slides, presentation_name)
+    #json_file = qwen_answer
 
     v.clear_db()
 

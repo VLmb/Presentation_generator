@@ -11,12 +11,12 @@ text = "/gen_by_text"
 # @api_bp.route('/create_presentation_by_text', methods=['POST'])
 # def create_presentation_by_text
 
-@api_bp.route('/gen_presentation_by_params', methods=['POST'])
+@api_bp.route('/gen_presentation_by_title', methods=['POST'])
 def gen_presentation_by_params():
     data = request.get_json()
 
-    name_of_presentation = data.get('Name of presentation')
-    name_of_creator = data.get('Name of creator')
+    name_of_presentation = data.get("Presentation_title")
+    name_of_creator = "User_1"
 
     headers = {"Content-Type": "application/json", "User-Agent": "MyApp"}
     response = requests.post("http://127.0.0.1:5001/api_neuro_part/gen_by_def_params", json=data, headers=headers)
@@ -41,11 +41,11 @@ def gen_presentation_by_params():
     for index, slide_data in enumerate(slides_data, start=1):
         slide = Slide(
             presentation_id=presentation.id,
-            theme="theme",     #slide_data.get('theme'),
-            title=slide_data.get('header'),
+            theme="Theme_1",     #slide_data.get('theme'),
+            title=slide_data.get('Slide_title'),
             title_font="Normal",  #slide_data.get('title_font')
             title_font_size=16,  #slide_data.get('title_font_size'),
-            content=slide_data.get('description'),
+            content=slide_data.get('Slide_content'),
             content_font="Normal",  #slide_data.get('content_font'),
             content_font_size=14,  #slide_data.get('content_font_size'),
             images="null" #slide_data.get('images_url', [])
@@ -54,20 +54,14 @@ def gen_presentation_by_params():
 
     db.session.commit()
 
-    return jsonify({
-        '!!!': "Эшкере",
-        'id': presentation.id,
-        'name_of_presentation': presentation.name_of_presentation,
-        'user_name': presentation.user_name,
-        'slides_count': len(slides_data)
-    })
+    return answer
 
 @api_bp.route('/gen_presentation_by_text', methods=['POST'])
 def gen_presentation_by_text():
     data = request.get_json()
 
-    name_of_presentation = data.get('Name of presentation')
-    name_of_creator = data.get('Name of creator')
+    name_of_presentation = data.get("Presentation_title")
+    name_of_creator = "User_1"
 
     headers = {"Content-Type": "application/json", "User-Agent": "MyApp"}
     response = requests.post("http://127.0.0.1:5001/api_neuro_part/gen_by_text", json=data, headers=headers)
@@ -89,11 +83,11 @@ def gen_presentation_by_text():
     for index, slide_data in enumerate(slides_data, start=1):
         slide = Slide(
             presentation_id=presentation.id,
-            theme="theme",  # slide_data.get('theme'),
-            title=slide_data.get('header'),
+            theme="Theme_1",  # slide_data.get('theme'),
+            title=slide_data.get('Slide_title'),
             title_font="Normal",  # slide_data.get('title_font')
             title_font_size=16,  # slide_data.get('title_font_size'),
-            content=slide_data.get('description'),
+            content=slide_data.get('Slide_content'),
             content_font="Normal",  # slide_data.get('content_font'),
             content_font_size=14,  # slide_data.get('content_font_size'),
             images="null"  # slide_data.get('images_url', [])
@@ -102,13 +96,7 @@ def gen_presentation_by_text():
 
     db.session.commit()
 
-    return jsonify({
-        '!!!': "Эшкере",
-        'id': presentation.id,
-        'name_of_presentation': presentation.name_of_presentation,
-        'user_name': presentation.user_name,
-        'slides_count': len(slides_data)
-    })
+    return answer
 
 @api_bp.route('/create_presentation', methods=['POST'])
 def create_presentation():

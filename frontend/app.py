@@ -47,7 +47,7 @@ def generate_slides_json(topic, slides_count):
     data = json.dumps(presentation_data, ensure_ascii=False, indent=4)
 
     headers = {"Content-Type": "application/json", "User-Agent": "MyApp"}
-    response = requests.post("http://127.0.0.1:5000/api_backend/gen_presentation_by_params", json=data(), headers = headers())
+    response = requests.post("http://127.0.0.1:5000/api_backend/gen_presentation_by_title", json=data(), headers = headers())
     response.json()
 
     return
