@@ -7,10 +7,10 @@ api_bp = Blueprint('api_neuro_part', __name__)
 def gen_by_def_params():
     data = request.get_json()
     answer = neuro_gen_by_def_params(data)
-    return answer
+    return jsonify(answer)
 
 @api_bp.route('/gen_by_text', methods = ['POST'])
 def gen_by_text():
     data = request.get_json()
     answer = neuro_gen_by_text(data)
-    return answer
+    return jsonify(answer)

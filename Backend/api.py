@@ -135,7 +135,7 @@ def create_presentation():
     db.session.commit()
 
     return jsonify({
-        '!!!': "Эшкере",
+        '!!!': "Эшкере  ",
         'id': presentation.id,
         'name_of_presentation': presentation.name_of_presentation,
         'user_name': presentation.user_name,

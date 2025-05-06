@@ -1,7 +1,8 @@
 from gradio_client import Client
 import json
+import time
 
-client = Client("Qwen/Qwen2.5") # Нужен URL
+client = Client("Qwen/Qwen2.5")  # Укажи актуальный URL
 
 SYSTEM_PROMPT = '''Вы — эксперт по созданию текста для презентаций. 
 Ваша задача — генерировать контент для презентации на основе запроса пользователя.
@@ -19,7 +20,7 @@ SYSTEM_PROMPT = '''Вы — эксперт по созданию текста д
 Верните только указанное количество слайдов, каждый с уникальным заголовком и текстом, соответствующим теме.
 ответ возвращай в json формате. Если после "Предложения, на основе которых создавать слайды" есть текст, то генерируешь
 презентацию ТОЛЬКО и только, ничем более не руководствуясь, на основе этого текста, если текст отсутствует, то генерируешь, ориентируясь лишь на название
-'''# добавить формата пример
+'''
 
 RADIO = "72B"
 API_NAME = "/model_chat"
@@ -31,13 +32,11 @@ def create_user_prompt(slides_num, pres_name, text='') -> str:
               f"Предложения, на основе которых создавать слайды: {text}")
     return prompt
 
-
 def query_to_qwen(slides_num, pres_name, text=''):
     '''
     Делает запрос в нейросеть, формируя промпт пользователя, после возвращает
     текстовый ответ от нейросети
     '''
-
     user_prompt = create_user_prompt(slides_num, pres_name, text)
     try:
         result = client.predict(
@@ -55,33 +54,47 @@ def query_to_qwen(slides_num, pres_name, text=''):
         text_answer = text_answer.replace("`", "")
         text_answer = text_answer.replace("json\n", "")
 
-        text_answer = json.loads(text_answer) # представляем ответ в виде словаря
+        text_answer = json.loads(text_answer)  # представляем ответ в виде словаря
         return text_answer
 
     except Exception as e:
-        print("ошибка",e)
+        print("ошибка", e)
         return None
 
-
-def parse_text(text_answer):
+def generate_presentation_by_description(description, slides_num, pres_name):
     '''
-    Парсит ответ нейросети
-    (вероятнее всего, функцию надо будет переделать, чтобы она делала json)
+    Генерирует презентацию на основе описания
     '''
+    response = query_to_qwen(slides_num, pres_name, description)
+    if response and "Slides" in response:
+        return {"Slides": response["Slides"]}
+    else:
+        return {"Slides": []}
 
-    try:
-        slides = text_answer.split("слайд")[1:]
-        results = []
-        for slide in slides:
-            lines = slide.strip().split("\n")
-            if len(lines)>=2:
-                title = lines[0].strip()
-                description = "\n".join(lines[1:]).strip().split("\n")
-                results.append({"title":title,"text":description})
-        return results
+def generate_presentation_by_titles(pres_name, slides):
+    '''
+    Генерирует слайды по названиям, отправляя отдельный запрос на каждый слайд
+    '''
+    result_slides = []
+    for slide in slides:
+        slide_title = slide.get("Slide_title", "")
+        response = query_to_qwen(1, pres_name, slide_title)
+        if response and "Slides" in response and len(response["Slides"]) > 0:
+            slide_content = response["Slides"][0].get("Slide_content", "")
+            result_slides.append({
+                "Slide_title": slide_title,
+                "Slide_content": slide_content
+            })
+        else:
+            result_slides.append({
+                "Slide_title": slide_title,
+                "Slide_content": "Не удалось сгенерировать содержимое слайда."
+            })
+        time.sleep(1)  # Пауза между запросами, чтобы избежать перегрузки
+    return {"Slides": result_slides}
 
-    except Exception:
-        return [{"title":"ошибка","text":text_answer}]
+
+
 
 if __name__ == "__main__":
     test_text = '''Вот тебе 10 чётких и развёрнутых тезисов про глобализацию — без воды, по существу и с разных сторон:1. **Ускоренный обмен технологиями и знаниями**  Глобализация упростила доступ к современным технологиям, исследованиям и образовательным ресурсам по всему миру. Это позволяет развивающимся странам быстрее сокращать технологическое отставание.2. **Углубление международного разделения труда**  Страны специализируются на том, что у них получается лучше всего (по Рикардо), а цепочки поставок растягиваются на весь мир. Например, айфон проектируют в США, компоненты производят в Азии, собирают в Китае.
@@ -102,3 +115,5 @@ if __name__ == "__main__":
 Сегодня всё чаще появляются антиглобалистские тренды: протекционизм, санкции, возврат производств, локализация IT. Это реакция на уязвимости глобального мира и попытка вернуть контроль над экономикой и суверенитетом.
 '''
     print(query_to_qwen("3", "проблемы кочевников", test_text))
+    print("\n", generate_presentation_by_description(test_text, 2, "влияние глобализации на кфс"))
+    print("\n", generate_presentation_by_titles("влияние глобализации на растения", [{"Slide_title":"фикус"}, {"Slide_title": "гепсофилы"}]))
