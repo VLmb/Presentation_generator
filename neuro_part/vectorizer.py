@@ -1,5 +1,5 @@
 import json
-from RAG.chunk_creater import  text_to_chunks
+from RAG.chunk_creater import text_to_chunks
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
@@ -64,6 +64,7 @@ def save_chunks_with_vectors(text, db_path=DB_PATH) -> None:
     config = {"db_path": db_path}
     with open("RAG/config.json", "w", encoding="utf-8") as f:
         json.dump(config, f)
+
 
 def clear_db(db_path=DB_PATH) -> None:
     """
