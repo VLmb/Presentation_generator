@@ -1,6 +1,13 @@
 from gradio_client import Client
 import json
 import time
+from loguru import logger
+import sys
+
+# Настройка логгера
+logger.remove()
+logger.add(sys.stderr, level="INFO")
+logger.add("presentation_generator.log", rotation="1 MB", compression="zip")
 
 client = Client("Qwen/Qwen2.5")  # Укажи актуальный URL
 
@@ -31,6 +38,7 @@ def create_user_prompt(slides_num: str, pres_name: str, text='') -> str:
               f"Тема презентации: {pres_name}. "
               f"Для каждого слайда придумай заголовок и описание."
               f"Предложения, на основе которых создавать слайды: {text}")
+    logger.debug(f"Создан промпт пользователя: {prompt}")
     return prompt
 
 
@@ -40,6 +48,7 @@ def query_to_qwen(slides_num: any, pres_name: str, text='') -> dict[str, any]:
     текстовый ответ от нейросети
     """
     user_prompt = create_user_prompt(slides_num, pres_name, text)
+    logger.info(f"Отправка запроса в Qwen для темы '{pres_name}' с {slides_num} слайдами...")
     try:
         result = client.predict(
             query=user_prompt,
@@ -52,15 +61,18 @@ def query_to_qwen(slides_num: any, pres_name: str, text='') -> dict[str, any]:
         else:
             text_answer = result
 
-        # удаление "мусора"
+        logger.debug(f"Сырой ответ от нейросети: {text_answer}")
+
+        # удаление мусора
         text_answer = text_answer.replace("`", "")
         text_answer = text_answer.replace("json\n", "")
 
         text_answer = json.loads(text_answer)  # представляем ответ в виде словаря
+        logger.success("Ответ успешно обработан и преобразован в JSON.")
         return text_answer
 
     except Exception as e:
-        print("ошибка", e)
+        logger.exception(f"Ошибка при генерации презентации: {e}")
         return {"Slides": ["Ошибка генерации презентации"]}
 
 
@@ -68,10 +80,13 @@ def generate_presentation_by_file(description, slides_num, pres_name) -> dict[st
     """
     Генерирует презентацию на основе описания
     """
+    logger.info(f"Генерация презентации по описанию: тема '{pres_name}', {slides_num} слайда(ов).")
     response = query_to_qwen(slides_num, pres_name, description)
     if response and "Slides" in response:
+        logger.success(f"Успешно сгенерировано {len(response['Slides'])} слайдов.")
         return {"Slides": response["Slides"]}
     else:
+        logger.warning("Слайды не были сгенерированы корректно.")
         return {"Slides": []}
 
 
@@ -80,16 +95,20 @@ def generate_presentation_by_params(slides_num, pres_name, slides) -> dict[str, 
     Генерирует слайды по названиям, отправляя отдельный запрос на каждый слайд
     """
     result_slides = []
+    logger.info(f"Начата поштучная генерация слайдов для темы '{pres_name}' ({slides_num} слайдов).")
     for slide in slides:
         slide_title = slide.get("Slide_title", "")
+        logger.info(f"Генерация слайда: '{slide_title}'")
         response = query_to_qwen(slides_num, pres_name, slide_title)
         if response and "Slides" in response and len(response["Slides"]) > 0:
             slide_content = response["Slides"][0].get("Slide_content", "")
+            logger.success(f"Слайд '{slide_title}' успешно сгенерирован.")
             result_slides.append({
                 "Slide_title": slide_title,
                 "Slide_content": slide_content
             })
         else:
+            logger.warning(f"Не удалось сгенерировать слайд '{slide_title}'.")
             result_slides.append({
                 "Slide_title": slide_title,
                 "Slide_content": "Не удалось сгенерировать содержимое слайда."
