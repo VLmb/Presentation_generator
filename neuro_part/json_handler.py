@@ -4,8 +4,8 @@ import slide_generator as sg
 
 def neuro_gen_by_def_params(json_file):
 
-    presentation_title = json_file.get("Presentation_title", "")
-    slides = json_file.get("Slides", [])
+    presentation_title = json_file.get("Presentation_title")
+    slides = json_file.get("Slides")
 
     return sg.generate_presentation_by_titles(presentation_title, slides)
 

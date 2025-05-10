@@ -6,7 +6,9 @@ api_bp = Blueprint('api_neuro_part', __name__)
 @api_bp.route('/gen_by_def_params', methods = ['POST'])
 def gen_by_def_params():
     data = request.get_json()
+    print(data)
     answer = neuro_gen_by_def_params(data)
+    print(answer)
     return jsonify(answer)
 
 @api_bp.route('/gen_by_text', methods = ['POST'])
