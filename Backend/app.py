@@ -17,6 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,
     'pool_timeout': 60,
+    'pool_recycle': 299,
     'pool_size': 5,
     'max_overflow': 10,
 }
@@ -26,4 +27,4 @@ init_db(app)
 app.register_blueprint(api_bp, url_prefix='/api_backend')
 
 if __name__ == '__main__':
-    app.run(debug=False, use_reloader=False, port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
