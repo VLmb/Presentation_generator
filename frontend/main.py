@@ -59,34 +59,34 @@ if mode == "Генератор по файлу":
 
 
 if st.button("Создать презентацию", type="primary"):
-    slides_data = {
-        "Presentation_title": topic,
-        "Slide_count": slides_count,
-    }
-
-    if mode == "Генератор по файлу":
-        slides_data["Description"] = file_text.strip()
-        response = requests.post(
-            "http://localhost:5000/api_backend/gen_presentation_by_text",
-            json=slides_data
-        )
-        slides_data['Slides'] = response.json().get('Slides', [])
-        
-    else:
-        slides_data['Slides'] = [{
-            "Slide_title": "",
-            "Slide_content": ""
-        } for _ in range(slides_count)]
-        response = requests.post(
-            "http://localhost:5000/api_backend/gen_presentation_by_title",
-            json=slides_data
-        )
-        slides_data['Slides'] = response.json().get('Slides', [])
-    
     with st.spinner("Идёт создание презентации..."):
+        slides_data = {
+            "Presentation_title": topic,
+            "Slide_count": slides_count,
+        }
+
+        if mode == "Генератор по файлу":
+            slides_data["Description"] = file_text.strip()
+            response = requests.post(
+                "http://localhost:5000/api_backend/gen_presentation_by_text",
+                json=slides_data
+            )
+            slides_data['Slides'] = response.json().get('Slides', [])
+            
+        else:
+            slides_data['Slides'] = [{
+                "Slide_title": "",
+                "Slide_content": ""
+            } for _ in range(slides_count)]
+            response = requests.post(
+                "http://localhost:5000/api_backend/gen_presentation_by_title",
+                json=slides_data
+            )
+            slides_data['Slides'] = response.json().get('Slides', [])
+    
         pptx_path = create_presentation(topic, slides_data, bg_path)
         pdf_path = convert_to_pdf(pptx_path)
-        previews = generate_previews(pptx_path, len(slides_data))
+        previews = generate_previews(pptx_path, len(slides_data)+1)
 
     st.success("Готово!")
 
