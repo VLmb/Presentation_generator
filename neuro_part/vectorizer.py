@@ -24,6 +24,8 @@ torch.cuda.empty_cache()
 logger.info(f"Модель загружена и перемещена на устройство: {device}")
 
 DB_PATH = "RAG/chroma_db"
+chroma_client = chromadb.PersistentClient(path=DB_PATH)
+collection = chroma_client.get_or_create_collection(name="documents")
 
 
 def vectorize_chunks(chunks: list, pooling_method="mean", batch_size=16) -> list:

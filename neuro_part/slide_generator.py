@@ -3,6 +3,22 @@ import json
 import time
 from loguru import logger
 import sys
+import vectorizer as v
+from RAG import give_chunk_from_query as g
+import json
+import ast
+
+def safe_parse_json(text: str) -> dict:
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as e:
+        from loguru import logger
+        logger.warning(f"json.loads не справился: {e}. Пробуем через ast.literal_eval")
+        try:
+            return ast.literal_eval(text)
+        except Exception as ex:
+            logger.error(f"Не удалось распарсить json даже через ast: {ex}")
+            return {"Slides": ["Ошибка генерации презентации"]}
 
 # Настройка логгера
 logger.remove()
@@ -67,27 +83,13 @@ def query_to_qwen(slides_num: any, pres_name: str, text='') -> dict[str, any]:
         text_answer = text_answer.replace("`", "")
         text_answer = text_answer.replace("json\n", "")
 
-        text_answer = json.loads(text_answer)  # представляем ответ в виде словаря
+        text_answer = safe_parse_json(text_answer)  # представляем ответ в виде словаря
         logger.success("Ответ успешно обработан и преобразован в JSON.")
         return text_answer
 
     except Exception as e:
         logger.exception(f"Ошибка при генерации презентации: {e}")
         return {"Slides": ["Ошибка генерации презентации"]}
-
-
-def generate_presentation_by_file(description, slides_num, pres_name) -> dict[str, any]:
-    """
-    Генерирует презентацию на основе описания
-    """
-    logger.info(f"Генерация презентации по описанию: тема '{pres_name}', {slides_num} слайда(ов).")
-    response = query_to_qwen(slides_num, pres_name, description)
-    if response and "Slides" in response:
-        logger.success(f"Успешно сгенерировано {len(response['Slides'])} слайдов.")
-        return {"Slides": response["Slides"]}
-    else:
-        logger.warning("Слайды не были сгенерированы корректно.")
-        return {"Slides": []}
 
 
 def generate_presentation_by_params(slides_num, pres_name, slides) -> dict[str, any]:
@@ -117,6 +119,50 @@ def generate_presentation_by_params(slides_num, pres_name, slides) -> dict[str, 
     return {"Slides": result_slides}
 
 
+def generate_presentation_from_file_with_titles_and_chunks(description, slides_num, pres_name) -> dict[str, any]:
+    """
+    Полная генерация презентации:
+    - генерирует заголовки слайдов на основе текста
+    - для каждого заголовка находит релевантные чанки
+    - генерирует слайд по заголовку + чанкам
+    """
+    logger.info(f"Старт генерации по файлу: тема — '{pres_name}', количество слайдов — {slides_num}")
+
+    v.save_chunks_with_vectors(description)
+
+    logger.info("Запрос к нейросети для генерации заголовков слайдов...")
+    slide_titles_json = query_to_qwen(slides_num, pres_name, description)
+    slide_titles = [s["Slide_title"] for s in slide_titles_json.get("Slides", [])]
+
+    result_slides = []
+
+    for i, title in enumerate(slide_titles, 1):
+        logger.info(f"[{i}/{len(slide_titles)}] Поиск чанков под заголовок '{title}'...")
+        relevant_chunks = g.find_similar_chunks(title)
+        text_for_slide = ' '.join(relevant_chunks)
+
+        logger.info(f"Генерация слайда: '{title}'...")
+        slide_response = query_to_qwen(1, title, text_for_slide)
+
+        if "Slides" in slide_response and slide_response["Slides"]:
+            slide = slide_response["Slides"][0]
+            result_slides.append({
+                "Slide_title": title,
+                "Slide_content": slide.get("Slide_content", "Ошибка генерации текста.")
+            })
+            logger.success(f"Слайд '{title}' сгенерирован успешно.")
+        else:
+            result_slides.append({
+                "Slide_title": title,
+                "Slide_content": "Ошибка генерации текста."
+            })
+            logger.warning(f"Не удалось сгенерировать слайд '{title}'")
+
+    v.clear_db()
+    logger.success("Генерация завершена.")
+    return {"Slides": result_slides}
+
+
 if __name__ == "__main__":
     test_text = '''Вот тебе 10 чётких и развёрнутых тезисов про глобализацию — без воды, по существу и с разных 
     сторон:1. **Ускоренный обмен технологиями и знаниями**  Глобализация упростила доступ к современным технологиям, 
@@ -142,6 +188,6 @@ if __name__ == "__main__":
     Сегодня всё чаще появляются антиглобалистские тренды: протекционизм, санкции, возврат производств, локализация 
     IT. Это реакция на уязвимости глобального мира и попытка вернуть контроль над экономикой и суверенитетом.'''
     print(query_to_qwen("3", "проблемы кочевников", test_text))
-    print("\n", generate_presentation_by_file(test_text, 2, "влияние глобализации на кфс"))
+    print("\n", generate_presentation_from_file_with_titles_and_chunks(test_text, 2, "влияние глобализации на кфс"))
     print("\n", generate_presentation_by_params(3, "влияние глобализации на растения",
                                                 [{"Slide_title": "фикус"}, {"Slide_title": "гепсофилы"}]))
