@@ -1,6 +1,6 @@
 # Plagiarism_of_Gamma
 
-![image](https://github.com/user-attachments/assets/07cc8789-aebc-4650-9778-8c286c825007)
+![image](https://github.com/user-attachments/assets/41ff6739-6d40-4df0-afc7-e36b69f15bb6)
 
 
 Presentation Generator
@@ -31,6 +31,8 @@ Git — для контроля версий
 
 Что такое RAG (Retrieval-Augmented Generation)
 Retrieval-Augmented Generation (RAG) — это метод, объединяющий возможности извлечения информации и генерации текста. В отличие от традиционных моделей, которые генерируют текст на основе обученных данных, RAG сначала извлекает релевантную информацию из внешних источников (например, документов, баз данных), а затем использует эту информацию для генерации ответа.
+
+![image](https://github.com/user-attachments/assets/f7396cb6-d785-4cf3-a3b6-3c50d3cd44f4)
 
 
 Преимущества RAG:
