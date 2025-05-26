@@ -1,12 +1,42 @@
-import streamlit as st
-from .presentation import create_presentation, convert_to_pdf, generate_previews
-from .file_processor import parse_file_to_slides
-from .config import BACKGROUNDS, init_environment
 import os
+import io
+from typing import List
+import docx
+import PyPDF2
+import requests
+import streamlit as st
+
+from presentation import create_presentation, convert_to_pdf, generate_previews
+from file_processor import parse_file_to_slides
+from config import BACKGROUNDS, init_environment
+
+
+def extract_text_from_file(uploaded_file) -> str:
+        """
+        Извлекает текст из загруженного файла (txt, pdf, docx).
+        Returns:
+            str: Извлечённый текст.
+        """
+        filename = uploaded_file.name.lower()
+        if filename.endswith('.txt'):
+            return uploaded_file.getvalue().decode("utf-8")
+        elif filename.endswith('.pdf'):
+            pdf_reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.getvalue()))
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text() or ""
+            return text
+        elif filename.endswith('.docx'):
+            doc = docx.Document(io.BytesIO(uploaded_file.getvalue()))
+            text = "\n".join([para.text for para in doc.paragraphs])
+            return text
+        else:
+            return ""
 
 init_environment()
 
 st.title("📊 Генератор презентаций")
+
 mode = st.radio("Режим работы:", ["Обычный генератор", "Генератор по файлу"], horizontal=True)
 
 col1, col2 = st.columns(2)
@@ -16,22 +46,43 @@ with col2:
     selected_bg = st.selectbox("Фон презентации", list(BACKGROUNDS.keys()))
 bg_path = BACKGROUNDS[selected_bg]
 
-if mode == "Обычный генератор":
-    slides_count = st.number_input("Количество слайдов", 1, 50, 3)
-    slides_data = [{"title": f"Слайд {i + 1}", "content": ""} for i in range(slides_count)]
-    for i, slide in enumerate(slides_data):
-        with st.expander(f"Слайд {i + 1}"):
-            slide["title"] = st.text_input("Заголовок", slide["title"], key=f"title_{i}")
-            slide["content"] = st.text_area("Содержание", slide["content"], key=f"content_{i}")
-else:
-    uploaded_file = st.file_uploader("Загрузите текстовый файл", type=["txt"])
-    if uploaded_file:
-        slides_data = parse_file_to_slides(uploaded_file)
-        st.success(f"Загружено {len(slides_data)} слайдов")
-    else:
-        slides_data = []
+slides_count = st.number_input("Количество слайдов", 1, 50, 3)
 
-if st.button("Создать презентацию", type="primary") and slides_data:
+if mode == "Генератор по файлу":
+    uploaded_file = st.file_uploader("Загрузите файл (txt, pdf, docx)", type=["txt", "pdf", "docx"])
+    if uploaded_file:
+        file_text = extract_text_from_file(uploaded_file)
+        if file_text.strip():
+            st.success(f"Файл успешно загружен")
+        else:
+            st.warning(f"Вы загрузили пустой файл")
+
+
+if st.button("Создать презентацию", type="primary"):
+    slides_data = {
+        "Presentation_title": topic,
+        "Slide_count": slides_count,
+    }
+
+    if mode == "Генератор по файлу":
+        slides_data["Description"] = file_text.strip()
+        response = requests.post(
+            "http://localhost:5000/api_backend/gen_presentation_by_text",
+            json=slides_data
+        )
+        slides_data['Slides'] = response.json().get('Slides', [])
+        
+    else:
+        slides_data['Slides'] = [{
+            "Slide_title": "",
+            "Slide_content": ""
+        } for _ in range(slides_count)]
+        response = requests.post(
+            "http://localhost:5000/api_backend/gen_presentation_by_title",
+            json=slides_data
+        )
+        slides_data['Slides'] = response.json().get('Slides', [])
+    
     with st.spinner("Идёт создание презентации..."):
         pptx_path = create_presentation(topic, slides_data, bg_path)
         pdf_path = convert_to_pdf(pptx_path)

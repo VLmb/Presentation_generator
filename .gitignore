@@ -8,6 +8,10 @@
 /Backend/main.py
 /Backend/Notes.txt
 
+/Backend/.back_venv
+/frontend/.frontend_venv
+/neuro_part/.rag_venv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
