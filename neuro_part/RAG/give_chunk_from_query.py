@@ -7,7 +7,7 @@ from transformers import AutoTokenizer, AutoModel
 DB_PATH = "./chroma_db"
 
 chroma_client = chromadb.PersistentClient(path=DB_PATH)
-collection = chroma_client.get_collection(name="documents")
+collection = chroma_client.get_or_create_collection(name="documents")
 
 tokenizer = AutoTokenizer.from_pretrained("ai-forever/ru-en-RoSBERTa")
 model = AutoModel.from_pretrained("ai-forever/ru-en-RoSBERTa").to("cuda" if torch.cuda.is_available() else "cpu")

@@ -1,6 +1,8 @@
 import vectorizer as v
 from RAG import give_chunk_from_query as g
 import slide_generator as sg
+from loguru import logger
+
 
 
 def neuro_gen_by_params(json_file: dict[str, any]) -> dict[str, any]:
@@ -15,27 +17,20 @@ def neuro_gen_by_params(json_file: dict[str, any]) -> dict[str, any]:
     return sg.generate_presentation_by_params(slides_num, presentation_title, slides)
 
 
-# название, текст
+
 def neuro_gen_by_file(json_file: dict[str, any]) -> dict[str, any]:
     """
-    Функция парсит json, потом векторизует информацию с файла пользователя
-    После чего ищет по запросу пользователя наиболее подходящие чанки и по ним делает
-    запрос в нейроонку
-    :return: json информацией для презентации
+    Обёртка: вызывает расширенную генерацию по файлу с поиском заголовков и чанков.
     """
-    presentation_title = json_file.get("Presentation_title", "")  # название презентации
-    description = json_file.get("Description", "")  # текст файла, на основе которого делать презентацию
-    slide_count = json_file.get("Slide_count", 1)  # количество слайдов
+    from slide_generator import generate_presentation_from_file_with_titles_and_chunks
 
-    v.save_chunks_with_vectors(text=description)
-    chunks = g.find_similar_chunks(presentation_title)  # получаем чанки, соответствующие запросу названия презентации
-    chunks = ''.join(chunks)
+    presentation_title = json_file.get("Presentation_title", "")
+    description = json_file.get("Description", "")
+    slide_count = json_file.get("Slide_count", 1)
 
-    json_file = sg.generate_presentation_by_file(chunks, slide_count, presentation_title)
+    return generate_presentation_from_file_with_titles_and_chunks(description, slide_count, presentation_title)
 
-    v.clear_db()
 
-    return json_file
 
 
 '''
