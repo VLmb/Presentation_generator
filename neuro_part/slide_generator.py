@@ -1,5 +1,4 @@
 from gradio_client import Client
-import json
 import time
 from loguru import logger
 import sys
@@ -7,6 +6,13 @@ import vectorizer as v
 from RAG import give_chunk_from_query as g
 import json
 import ast
+import re
+
+def extract_json(text: str) -> str:
+    match = re.search(r'\{[\s\S]*"Slides"[\s\S]*\}', text)
+    if match:
+        return match.group()
+    return text
 
 def safe_parse_json(text: str) -> dict:
     try:
@@ -27,10 +33,14 @@ logger.add("presentation_generator.log", rotation="1 MB", compression="zip")
 
 client = Client("Qwen/Qwen2.5")
 
-SYSTEM_PROMPT = '''Вы — эксперт по созданию текста для презентаций. 
-Ваша задача — генерировать контент для презентации на основе запроса пользователя.
-Для каждого слайда предоставьте заголовок и описание в следующем формате:
-"Slides": [{"Slide_title":  , "Slide_content":}]".
+SYSTEM_PROMPT = '''Вы — эксперт по созданию презентаций. Ваша задача — генерировать уникальный, разнообразный и насыщенный смыслом текст. Для каждого слайда придумайте заголовок и описание. 
+Важные требования:
+— Каждый слайд должен быть тематически отличен от остальных.
+— Повтор смыслов, шаблонов и перефразирование уже сказанного запрещены.
+— Структура: "Slides": [{"Slide_title": "...", "Slide_content": "..."}].
+— Тексты должны быть логично связаны с темой, но освещать её с разных сторон.
+— Не используйте общие фразы, старайтесь быть конкретными и информативными.
+
 вот тебе пример json-ответа
   "Slides": [
     {
@@ -41,19 +51,22 @@ SYSTEM_PROMPT = '''Вы — эксперт по созданию текста д
 по итогу, ты должен мне вернуть массив слайдов, для каждого есть два поля - Slide_title и Slide_content
 
 Верните только указанное количество слайдов, каждый с уникальным заголовком и текстом, соответствующим теме. ответ 
-возвращай в json формате. Если после "Предложения, на основе которых создавать слайды" есть текст, то генерируешь 
-презентацию, преимущественно, на основе этого текста, если текст отсутствует, 
-то генерируешь, ориентируясь лишь на название'''
+возвращай в json формате.'''
 
 RADIO = "72B"
 API_NAME = "/model_chat"
 
 
 def create_user_prompt(slides_num: str, pres_name: str, text='') -> str:
-    prompt = (f"Создай презентацию с количеством слайдов: {slides_num}. "
-              f"Тема презентации: {pres_name}. "
-              f"Для каждого слайда придумай заголовок и описание."
-              f"Предложения, на основе которых создавать слайды: {text}")
+    prompt = (
+        f"Создай {slides_num} слайд(ов) для презентации на тему: '{pres_name}'. "
+        "Каждый слайд должен рассматривать тему с новой стороны. "
+        "Обязательно избегай повторов и общих фраз. "
+        "Если указан дополнительный текст — опирайся только на него. "
+    )
+    if text:
+        prompt += f"Контекст, на основе которого нужно сгенерировать слайд: {text}"
+
     logger.debug(f"Создан промпт пользователя: {prompt}")
     return prompt
 
@@ -82,6 +95,8 @@ def query_to_qwen(slides_num: any, pres_name: str, text='') -> dict[str, any]:
         # удаление мусора
         text_answer = text_answer.replace("`", "")
         text_answer = text_answer.replace("json\n", "")
+
+        text_answer = extract_json(text_answer)
 
         text_answer = safe_parse_json(text_answer)  # представляем ответ в виде словаря
         logger.success("Ответ успешно обработан и преобразован в JSON.")
