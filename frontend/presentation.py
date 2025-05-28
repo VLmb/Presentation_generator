@@ -1,4 +1,5 @@
 import os
+import requests
 from pptx import Presentation
 from pptx.util import Inches
 from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE
@@ -9,7 +10,7 @@ import tempfile
 from typing import List, Dict
 
 # Добавляем текстовое поле для содержимого слайда
-def add_textbox_with_text(prs, slide, text, left, top, width, height):
+def add_textbox_with_text(slide, text, left, top, width, height):
     left = Inches(left)
     top = Inches(top)
     width = Inches(width)
@@ -24,6 +25,48 @@ def add_textbox_with_text(prs, slide, text, left, top, width, height):
     #text_frame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
 
 
+def search_unsplash_images(query: str):
+    """
+    Выполняет поиск изображений на Unsplash по заданному запросу и возвращает объект ответа.
+
+    Args:
+        query (str): Поисковый запрос.
+
+    Returns:
+        response (requests.Response): Ответ от Unsplash API.
+    """
+    ACCESS_KEY = 'ns_k09as7WL-3HKDhcgCLu7fDNC0eZ-53klLpMg3eDk'
+    url = 'https://api.unsplash.com/search/photos'
+    params = {
+        'query': query,
+        'client_id': ACCESS_KEY,
+        'lang': 'ru'
+    }
+    response = requests.get(url, params=params)
+    # print(response.json())
+    return response
+
+
+def save_image_from_url(url: str, save_path: str) -> None:
+    """
+    Сохраняет изображение по указанному URL на диск по заданному пути.
+
+    Args:
+        url (str): Ссылка на изображение.
+        save_path (str): Путь, по которому сохранить изображение.
+
+    Пример:
+        save_image_from_url('https://example.com/image.jpg', 'local_image.jpg')
+    """
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(save_path, 'wb') as f:
+            f.write(response.content)
+        print(f"Изображение успешно сохранено по пути: {save_path}")
+    else:
+        print(f"Не удалось скачать изображение. Код ответа: {response.status_code}")
+
+
 def create_presentation(topic: str, slides_data: List[Dict], background_path: str) -> str:
     """
     Создаёт презентацию PPTX с заданной темой, слайдами и фоном.
@@ -36,11 +79,14 @@ def create_presentation(topic: str, slides_data: List[Dict], background_path: st
     Возвращает:
         str: Путь к сохранённому файлу презентации PPTX.
     """
+    # Создаем папку для изображений
+    os.makedirs("temp_images", exist_ok=True)
+
     prs = Presentation()
 
     title_slide = prs.slides.add_slide(prs.slide_layouts[1])
 
-        # Устанавливаем фоновое изображение на весь слайд
+    # Устанавливаем фоновое изображение на весь слайд
     title_slide.shapes.add_picture(
         background_path,
         left=0,
@@ -50,9 +96,9 @@ def create_presentation(topic: str, slides_data: List[Dict], background_path: st
     )
 
     # Устанавливаем заголовок слайда
-    add_textbox_with_text(prs, title_slide, slides_data["Presentation_title"], 3.5, 3, 4, 2)
+    add_textbox_with_text(title_slide, slides_data["Presentation_title"], 3.5, 3, 4, 2)
 
-    for slide_data in slides_data["Slides"]:
+    for slide_id, slide_data in enumerate(slides_data["Slides"]):
         # Добавляем слайд с макетом "Заголовок и объект"
         slide = prs.slides.add_slide(prs.slide_layouts[1])
 
@@ -66,13 +112,39 @@ def create_presentation(topic: str, slides_data: List[Dict], background_path: st
         )
 
         # Устанавливаем заголовок слайда
-        add_textbox_with_text(prs, slide, slide_data["Slide_title"], 3, 0.5, 6, 2)
+        add_textbox_with_text(slide, slide_data["Slide_title"], 3, 1, 6, 2)
 
         # Устанавливаем текст слайда
-        add_textbox_with_text(prs, slide, slide_data["Slide_content"], 1, 3, 4, 4)
+        add_textbox_with_text(slide, slide_data["Slide_content"], 1, 3, 4, 4)
+
+        # Поиск и добавление изображения
+        text_search = slide_data["Slide_title"] + slide_data["Slide_content"]
+
+        image_url = search_unsplash_images(text_search).json()['results'][0]['urls']['raw']
+
+        image_path = f"temp_images/slide_{slide_id+1}.jpg"
+
+        save_image_from_url(image_url, image_path)
+        
+        left_img = Inches(5.5)
+        top_img = Inches(3)
+        width_img = Inches(4)
+        height_img = Inches(4)
+        
+        slide.shapes.add_picture(
+            image_path,
+            left_img, top_img,
+            width_img, height_img
+        )
 
     pptx_path = f"{topic}.pptx"
     prs.save(pptx_path)
+
+    # Удаляем временные изображения
+    for file in os.listdir("temp_images"):
+        os.remove(os.path.join("temp_images", file))
+    os.rmdir("temp_images")
+
     return pptx_path
 
 

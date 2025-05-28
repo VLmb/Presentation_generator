@@ -111,27 +111,13 @@ def generate_presentation_by_params(slides_num, pres_name, slides) -> dict[str, 
     """
     Генерирует слайды по названиям, отправляя отдельный запрос на каждый слайд
     """
-    result_slides = []
-    logger.info(f"Начата поштучная генерация слайдов для темы '{pres_name}' ({slides_num} слайдов).")
-    for slide in slides:
-        slide_title = slide.get("Slide_title", "")
-        logger.info(f"Генерация слайда: '{slide_title}'")
-        response = query_to_qwen(slides_num, pres_name, slide_title)
-        if response and "Slides" in response and len(response["Slides"]) > 0:
-            slide_content = response["Slides"][0].get("Slide_content", "")
-            logger.success(f"Слайд '{slide_title}' успешно сгенерирован.")
-            result_slides.append({
-                "Slide_title": slide_title,
-                "Slide_content": slide_content
-            })
-        else:
-            logger.warning(f"Не удалось сгенерировать слайд '{slide_title}'.")
-            result_slides.append({
-                "Slide_title": slide_title,
-                "Slide_content": "Не удалось сгенерировать содержимое слайда."
-            })
-        time.sleep(1)  # Пауза между запросами, чтобы избежать перегрузки
-    return {"Slides": result_slides}
+    logger.info(f"Генерация презентации: '{pres_name}'")
+    response = query_to_qwen(slides_num, pres_name)
+    if response and "Slides" in response and len(response["Slides"]) > 0:
+        logger.success(f"Презентация'{pres_name}' успешно сгенерирована.")
+    else:
+        logger.warning(f"Не удалось сгенерировать презентацию '{pres_name}'.")
+    return response
 
 
 def generate_presentation_from_file_with_titles_and_chunks(description, slides_num, pres_name) -> dict[str, any]:
