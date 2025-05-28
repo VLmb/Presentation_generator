@@ -1,4 +1,4 @@
-# Plagiarism_of_Gamma
+# Presentation_generator
 
 ![image](https://github.com/user-attachments/assets/41ff6739-6d40-4df0-afc7-e36b69f15bb6)
 
