@@ -112,7 +112,7 @@ def create_presentation(topic: str, slides_data: List[Dict], background_path: st
         )
 
         # Устанавливаем заголовок слайда
-        add_textbox_with_text(slide, slide_data["Slide_title"], 3, 1, 6, 2)
+        add_textbox_with_text(slide, slide_data["Slide_title"], 3, 0.8, 6, 2)
 
         # Устанавливаем текст слайда
         add_textbox_with_text(slide, slide_data["Slide_content"], 1, 3, 4, 4)

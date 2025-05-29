@@ -85,31 +85,11 @@ if st.button("Создать презентацию", type="primary"):
             )
             slides_data['Slides'] = response.json().get('Slides', [])
 
-        # st.success(f"Кол-во слайдов: {len(slides_data['Slides'])}")
-        # st.success(f"Слайды: {slides_data['Slides']}")
-        # slides_data = {
-        #     "Presentation_title": "Французская революция",
-        #     "Slide_count": 3,
-        #     "Slides": [
-        #         {
-        #         "Slide_title": "Что вообще произошло? Вводный слайд",
-        #         "Slide_content": "Общее представление о революции: когда, где и почему она началась. Франция конца XVIII века — котёл, готовый взорваться."
-        #         },
-        #         {
-        #         "Slide_title": "Франция до революции: пахнет жареным",
-        #         "Slide_content": "Кризис монархии, госдолг, бедность и беспредел — классическая завязка для грандиозного бунта. Людовик XVI не справляется."
-        #         },
-        #         {
-        #         "Slide_title": "Три сословия и ноль справедливости",
-        #         "Slide_content": "Разделение общества на духовенство, знать и всех остальных. Привилегии первых двух и страдания третьего."
-        #         }
-        #     ]
-        #     }
 
     
         pptx_path = create_presentation(topic, slides_data, bg_path)
         pdf_path = convert_to_pdf(pptx_path)
-        previews = generate_previews(pptx_path, len(slides_data)+1)
+        previews = generate_previews(pptx_path, len(slides_data['Slides'])+1)
 
     st.success("Готово!")
 
